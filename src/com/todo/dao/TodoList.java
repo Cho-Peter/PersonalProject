@@ -22,7 +22,7 @@ public class TodoList {
 	}
 
 	public int addItem(TodoItem t) {
-		String sql = "insert into list (title, memo, category, current_date, due_date)" + " values (?,?,?,?,?);";
+		String sql = "insert into list (title, memo, category, current_date, due_date, day)" + " values (?,?,?,?,?,?);";
 		PreparedStatement pstmt;
 		int count = 0;
 		try{
@@ -32,6 +32,7 @@ public class TodoList {
 			pstmt.setString(3, t.getCategory());
 			pstmt.setString(4, t.getCurrent_date());
 			pstmt.setString(5, t.getDue_date());
+			pstmt.setString(6, t.getDay());
 			count = pstmt.executeUpdate();
 			pstmt.close();
 		}catch(SQLException e){
@@ -57,7 +58,6 @@ public class TodoList {
 	}
 	
 
-	
 	public int getCount(){
 		Statement stmt;
 		int count = 0;
@@ -75,7 +75,7 @@ public class TodoList {
 	}
 
 	public int updateItem(TodoItem t) {
-		String sql = "update list set title = ?, memo = ?, category = ?, current_date = ?, due_date = ?" + " where id = ?;";
+		String sql = "update list set title = ?, memo = ?, category = ?, current_date = ?, due_date = ?, is_completed = ?, is_feedback = ?" + " where id = ?;";
 		PreparedStatement pstmt;
 		int count = 0;
 		try{
@@ -85,7 +85,9 @@ public class TodoList {
 			pstmt.setString(3, t.getCategory());
 			pstmt.setString(4, t.getCurrent_date());
 			pstmt.setString(5, t.getDue_date());
-			pstmt.setInt(6, t.getId());
+			pstmt.setInt(6, 0);
+			pstmt.setString(7, null);
+			pstmt.setInt(8, t.getId());
 			count = pstmt.executeUpdate();
 			pstmt.close();
 		}
@@ -111,10 +113,13 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_comp = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, category, description, due_date);
+				String feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, category, description, due_date, day);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(feedback);
 				list.add(t);
 			}
 			stmt.close();
@@ -142,10 +147,13 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_comp = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, category, due_date);
+				String is_feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, day);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(is_feedback);
 				list.add(t);
 			}
 			pstmt.close();
@@ -171,10 +179,13 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_comp = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, category, due_date);
+				String is_feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, day);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(is_feedback);
 				list.add(t);
 			}
 		}catch(SQLException e){
@@ -218,10 +229,13 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_comp = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, category, due_date);
+				String feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, day);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(feedback);
 				list.add(t);
 			}
 			stmt.close();
@@ -246,10 +260,13 @@ public class TodoList {
 				String due_date = rs.getString("due_date");
 				String current_date = rs.getString("current_date");
 				int is_comp = rs.getInt("is_completed");
-				TodoItem t = new TodoItem(title, description, category, due_date);
+				String feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, day);
 				t.setId(id);
 				t.setCurrent_date(current_date);
 				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(feedback);
 				list.add(t);
 			}
 		}catch(SQLException e){
@@ -273,12 +290,100 @@ public class TodoList {
 		}
 		return count;
 	}
-
-	public Boolean isDuplicate(String title) {
-		for (TodoItem item : getList()) {
-			if (title.equals(item.getTitle())) return true;
+	
+	public int feedbackItem(String feedback, int index) {
+		String sql = "update list set is_feedback = ?" + " where id = ?;";
+		PreparedStatement pstmt;
+		int count = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, feedback);
+			pstmt.setInt(2, index);
+			count = pstmt.executeUpdate();
+			pstmt.close();
+		}catch(SQLException e) {
+			e.printStackTrace();
 		}
-		return false;
+		return count;
+	}
+	
+	public ArrayList<TodoItem> getFeedbackItems(){
+		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
+		Statement stmt;
+		try{
+			stmt = conn.createStatement();
+			String sql = "SELECT * from list WHERE is_feedback <> 'null'";
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				int id = rs.getInt("id");
+				String category = rs.getString("category");
+				String title = rs.getString("title");
+				String description = rs.getString("memo");
+				String due_date = rs.getString("due_date");
+				String current_date = rs.getString("current_date");
+				int is_comp = rs.getInt("is_completed");
+				String feedback = rs.getString("is_feedback");
+				String day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, day);
+				t.setId(id);
+				t.setCurrent_date(current_date);
+				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(feedback);
+				list.add(t);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	public ArrayList<TodoItem> getDay(String day){
+		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
+		PreparedStatement pstmt;
+		try{
+			String sql = "SELECT * FROM list WHERE day =  ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, day);
+			ResultSet rs = pstmt.executeQuery();
+			while(rs.next()){
+				int id = rs.getInt("id");
+				String category = rs.getString("category");
+				String title = rs.getString("title");
+				String description = rs.getString("memo");
+				String due_date = rs.getString("due_date");
+				String current_date = rs.getString("current_date");
+				int is_comp = rs.getInt("is_completed");
+				String is_feedback = rs.getString("is_feedback");
+				String this_day = rs.getString("day");
+				TodoItem t = new TodoItem(title, description, category, due_date, this_day);
+				t.setId(id);
+				t.setCurrent_date(current_date);
+				t.setIs_Comp(is_comp);
+				t.setIs_Feedback(is_feedback);
+				list.add(t);
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	public boolean isDuplicate(String title) {
+
+		boolean re = true;
+		PreparedStatement pstmt;
+		try{
+			String sql = "SELECT * FROM list WHERE title =  ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1,title);
+			ResultSet rs = pstmt.executeQuery();
+			if(!rs.next()) re = false;
+			pstmt.close();
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+		}
+		return re;
 	}
 	
 	public void importData(String filename){

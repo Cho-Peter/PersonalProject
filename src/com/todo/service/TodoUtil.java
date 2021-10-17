@@ -44,7 +44,10 @@ public class TodoUtil {
 		System.out.print("제출기한: ");
 		due_date = sc.nextLine().trim();
 		
-		TodoItem t = new TodoItem(title, category, desc, due_date);
+		System.out.print("제출기한의 요일: ");
+		String day = sc.nextLine().trim();
+		
+		TodoItem t = new TodoItem(title, category, desc, due_date, day);
 		if(list.addItem(t) > 0) {
 			System.out.println("할일이 추가되었습니다.");
 		}
@@ -62,6 +65,26 @@ public class TodoUtil {
 		int num = sc.nextInt();
 		if(l.deleteItem(num) > 0) {
 					System.out.println("삭제되었습니다.");
+		}
+	}
+	
+	public static void deleteItems(TodoList l) {
+		
+		Scanner sc = new Scanner(System.in);
+		
+		
+		System.out.print("\n"
+				+ "[ 할일 삭제(동시) ]\n"
+				+ "삭제할 횟수: ");
+		
+		int num = sc.nextInt();
+		
+		for(int i=0; i<num; i++) {
+			System.out.print("삭제할 번호: ");
+			int index = sc.nextInt();
+			if(l.deleteItem(index) > 0) {
+				System.out.println("삭제되었습니다.");
+			}
 		}
 	}
 
@@ -97,7 +120,10 @@ public class TodoUtil {
 		System.out.print("새로운 제출기한: ");
 		String new_due_date = sc.nextLine().trim();
 		
-		TodoItem t = new TodoItem(new_title, new_category, new_description, new_due_date);
+		System.out.print("새로운 제출기한 요일: ");
+		String new_day = sc.nextLine().trim();
+		
+		TodoItem t = new TodoItem(new_title, new_category, new_description, new_due_date, new_day);
 		t.setId(num);
 		
 		if(l.updateItem(t)>0) {
@@ -151,9 +177,57 @@ public class TodoUtil {
 	}
 	
 	public static void comp(TodoList l, int key){
+		Scanner sc = new Scanner(System.in);
+		char cheak;
 		if(l.completeItem(key) > 0) {
 			System.out.println("완료체크 했습니다.");
+			System.out.print("완료한 항목에 대해 피드백 하시겠습니까? (Y/N): ");
+			cheak = sc.next().charAt(0);
+			if (cheak == 'Y') {
+				feedback(l, key);
+			}
 		}
+	}
+	
+	public static void comps(TodoList l, int num){
+		Scanner sc = new Scanner(System.in);
+		char cheak;
+		for(int i=0; i<num; i++) {
+			System.out.println("완료체크 번호: ");
+			int key = sc.nextInt();
+			if(l.completeItem(key) > 0) {
+				System.out.println("완료체크 했습니다.");
+				System.out.print("완료한 항목에 대해 피드백 하시겠습니까? (Y/N): ");
+				cheak = sc.next().charAt(0);
+				if (cheak == 'Y') {
+					feedback(l, key);
+				}
+			}
+		}
+	}
+	
+	public static void feedback(TodoList l, int key) {
+		Scanner sc = new Scanner(System.in);
+
+		String feedback;
+
+		System.out.println("피드백 내용: ");
+		feedback = sc.nextLine();
+
+		if(l.feedbackItem(feedback, key) > 0) {
+			System.out.println("피드백 항목에 입력을 완료했습니다.");
+		}
+	}
+	
+
+	public static void ls_feed(TodoList l){
+		int count = 0;
+		for(TodoItem item : l.getFeedbackItems()){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("총 %d개를 피드백이 있습니다.", count);
+		System.out.println("");
 	}
 
 	public static void ls_comp(TodoList l){
@@ -163,6 +237,123 @@ public class TodoUtil {
 			count++;
 		}
 		System.out.printf("총 %d개를 완료했습니다.", count);
+		System.out.println("");
+	}
+	
+	public static void ls_day(TodoList l) {
+		String day;
+		int count;
+		
+		count = 0;
+		day = "sun";
+		System.out.println("[일요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("일요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		
+		count = 0;
+		day = "mon";
+		System.out.println("[월요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("월요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		
+		count = 0;
+		day = "tue";
+		System.out.println("[화요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("화요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		
+		count = 0;
+		day = "wed";
+		System.out.println("[수요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		
+		System.out.printf("수요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		count = 0;
+		day = "thu";
+		System.out.println("[목요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("목요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		
+		count = 0;
+		day = "fri";
+		System.out.println("[금요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("금요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+		
+		count = 0;
+		day = "sat";
+		System.out.println("[토요일 리스트]");
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("토요일 할일이 총 %d개 있습니다.\n", count);
+		System.out.println("");
+	}
+	
+	public static void ls_day(TodoList l, String day) {
+		int count = 0;
+		char ch = ' ';
+		switch(day) {
+		case "sun":
+			ch = '일';
+			break;
+			
+		case "mon":
+			ch = '월';
+			break;
+			
+		case "tue":
+			ch = '화';
+			break;
+
+		case "wed":
+			ch = '수';
+			break;
+		
+		case "thu":
+			ch = '목';
+			break;
+
+		case "fri":
+			ch = '금';
+			break;
+
+		case "sat":
+			ch = '토';
+			break;
+
+		}
+		System.out.printf("[%c요일 리스트]\n", ch);
+		for(TodoItem item : l.getDay(day)){
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("%c요일 할일이 총 %d개 있습니다.\n", ch, count);
 		System.out.println("");
 	}
 	
@@ -179,8 +370,9 @@ public class TodoUtil {
 				String desc = st.nextToken();
 				String due_date = st.nextToken();
 				String date = st.nextToken();
+				String day = st.nextToken();
 				
-				TodoItem t = new TodoItem(title, category, desc, due_date);
+				TodoItem t = new TodoItem(title, category, desc, due_date, day);
 				t.setCurrent_date(date);
 				l.addItem(t);
 				i++;

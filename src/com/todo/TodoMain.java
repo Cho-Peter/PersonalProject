@@ -30,6 +30,10 @@ public class TodoMain {
 			case "del":
 				TodoUtil.deleteItem(l);
 				break;
+			
+			case "dels":
+				TodoUtil.deleteItems(l);
+				break;
 				
 			case "edit":
 				TodoUtil.updateItem(l);
@@ -69,6 +73,11 @@ public class TodoMain {
 				TodoUtil.findListCate(l, key_cate);
 				break;
 				
+			case "find_day":
+				String day = sc.nextLine().trim();
+				TodoUtil.ls_day(l, day);
+				break;
+				
 			case "ls_cate":
 				TodoUtil.listCate(l);
 				break;
@@ -78,8 +87,21 @@ public class TodoMain {
 				TodoUtil.comp(l, key);
 				break;
 				
+			case "comps":
+				int num = sc.nextInt();
+				TodoUtil.comps(l,num);
+				break;
+				
 			case "ls_comp":
 				TodoUtil.ls_comp(l);
+				break;
+				
+			case "ls_feed":
+				TodoUtil.ls_feed(l);
+				break;
+			
+			case "ls_day":
+				TodoUtil.ls_day(l);
 				break;
 				
 			case "help":
